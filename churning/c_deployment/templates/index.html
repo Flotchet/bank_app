@@ -1,0 +1,178 @@
+<!DOCTYPE HTML>
+<!--
+	Astral by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Churn prediction app</title>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper-->
+			<div id="wrapper">
+
+				<!-- Nav -->
+					<nav id="nav">
+						<a href="#" class="icon solid fa-brain"><span>Client chrun</span></a>
+						<a href="#data_insight" class="icon solid fa-chart-bar"><span>Data insight</span></a>
+						<a href="#contact" class="icon solid fa-users"><span>The team</span></a>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Me -->
+							<article id="home" class="panel">
+								<header>
+									{{result}}
+								</header>
+								<form method="POST" action="#">
+									<div class="row gtr-uniform gtr-50">
+
+																				
+										<div class="col-12">
+											<br>
+										</div>
+
+
+										<div class="col-12">
+											<h4>Enter your credentials</h4>
+										</div>
+
+										<div class="col-6 col-12-xsmall">
+											<input type="text" name="ID" id="" value="" placeholder="ID" required/>
+										</div>
+										<div class="col-6">
+											<input type="password" name="password" id="" value="" placeholder="password" required/>
+										</div>
+
+										
+
+
+										<div class="col-12">
+											<h4>Then</h4>
+										</div>
+
+
+										<div class="col-12"><div class="col-12 col-12-xsmall">
+											<input type="number" name="Client_ID" id="Client_ID" value="" placeholder="Client number" pattern="[0-9]{9}"/>
+										</div></div>
+
+
+
+										
+										<div class="col-12">
+											<h4>or</h4>
+										</div>
+										
+
+
+										
+									
+<!-- 'Total_Relationship_Count', 'Credit_Limit', 'Total_Revolving_Bal', 'Avg_Open_To_Buy', 'Total_Trans_Amt', 'Total_Trans_Ct' -->
+										
+										<div class="col-6">
+											<input type="number" min="0" step="1" max="100" name="Total_Relationship_Count" id="Total_Relationship_Count" value="" placeholder="Number of products" />
+										</div>
+
+										<div class="col-6">
+											<input type="number" min="0" step="0.01" max="1000000000000" name="Credit_Limit" id="Credit_Limit" value="" placeholder="Credit Limit" />
+										</div>
+
+										<div class="col-6">
+											<input type="number" min="0" step="0.01" max="1000000000000" name="Total_Revolving_Bal" id="Total_Revolving_Bal" value="" placeholder="Revolving balance" />
+										</div>
+
+										<div class="col-6">
+											<input type="number" min="0" step="0.01" max="1000000000000" name="Avg_Open_To_Buy" id="Avg_Open_To_Buy" value="" placeholder="Avg Open_To_Buy" />
+										</div>
+
+										<div class="col-6">
+											<input type="number" min="0" step="0.01" max="1000000000000" name="Total_Trans_Amt" id="Total_Trans_Amt" value="" placeholder="Total transaction amount" />
+										</div>
+
+										<div class="col-6">
+											<input type="number" min="0" step="0.01" max="1000000000000" name="Total_Trans_Ct" id="Total_Trans_Ct" value="" placeholder="Total number of transaction" />
+										</div>
+
+										<div class="col-12">
+											<br>
+										</div>
+
+		
+										<div class="col-12">
+											<ul class="actions">
+												<li><input type="submit" value="submit" class="primary" /></li>
+												<li><input type="reset" value="Reset" /></li>
+											</ul>
+										</div>
+
+										
+									</div>
+
+
+
+									
+								</form>
+							</article>
+						
+
+						<!-- Work -->
+							<article id="data_insight" class="panel">
+								<header>
+									<h2>Data insight</h2>
+								</header>
+								<p>
+									We can see in the graphs below the impact that different personal criteria (gender, income, education,...) have on the attrition flag.
+								</p>
+								<section>
+									{{graphs}}
+							</article>
+
+						<!-- Contact -->
+							<article id="contact" class="panel">
+								<div class="container">
+									<div class="row gtr-150">
+										<div class="col-12 col-12-medium">
+				
+								
+											<header class="major special">
+												<h2>About the team</h2>
+											</header>
+											<p><span class="image left"><img src="assets/images/1.jpeg" alt="" /></span><strong><a href="https://www.linkedin.com/in/florentmaisse/">Florent Maisse</a></strong> - Data Scientist/Engineer - Project Manager<br></p>
+											<p><span class="image left"><img src="assets/images/3.jpg" alt="" /></span><strong><a href="https://www.linkedin.com/in/emilia-genadieva/">Emilia Genadieva</a></strong> - ML Engineer<br></p>
+											<p><span class="image left"><img src="assets/images/2.png" alt=""/></span><strong><a href="https://www.linkedin.com/in/augustin-carbonnelle/">Augustin Carbonnelle</a></strong> - Data Analyst<br></p>
+							
+										</div>
+									</div>
+								</div>
+							</article>
+
+					</div>
+
+				<!-- Footer -->
+					<div id="footer">
+						<ul class="copyright">
+							<li>&copy; Maisse Florent</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+							<h1><a href="https://www.linkedin.com/in/florentmaisse/">ΣΔAΩ</a></h1>
+						</ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
