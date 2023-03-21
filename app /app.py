@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Markup, redirect, url_for, session
+from flask import Flask, render_template, request, Markup, url_for, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from waitress import serve
@@ -33,7 +33,31 @@ app.config['SQLALCHEMY_BINDS'] = {
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'csv'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+
 db = SQLAlchemy(app)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #real estate
 def RE_prepare_zipcode(df : pd.DataFrame) -> dict[int:float]:
@@ -423,6 +447,50 @@ def get_table(ticker : str) -> str:
 
     return table
     
+def get_table_limited(ticker : str) -> str:
+    """make an html table from the data of a company"""
+
+    engine_FIN = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/fin.db'), echo=False)
+    conn_FIN = engine_FIN.connect()
+    #get the data of the table ticker
+    result = conn_FIN.execute(f'SELECT * FROM  "{ticker}"', check_same_thread=False).fetchall()
+    conn_FIN.close()
+
+
+    #make the table
+    table = """
+    <table class="alt">
+    <tr>
+        <th>Date</th>
+        <th>Open</th>
+        <th>High</th>
+        <th>Low</th>
+        <th>Close</th>
+        <th>Adjusted Close</th>
+        <th>Volume</th>
+    </tr>
+    """
+    for enumarate, row in enumerate(result):
+        if enumarate == 10:
+            break
+        table+=f"""
+        <tr>
+        """
+        for col in row:
+            table += f"""
+            <td>{col}</td>
+            """
+        table += """
+        </tr>
+        """
+
+    table += """
+    </table>
+    """
+
+    return table
+
+
 def get_tickers(username : str) -> list:
     """get the tickers of the user from the followed db"""
 
@@ -456,6 +524,83 @@ def get_company(ticker : str) -> str:
     conn_FIN.close()
 
     return result[0][0]
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def add_file(filename : str) -> None:
+    """add a file to the fin db"""
+
+    engine_FIN = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/fin.db'), echo=False)
+    conn_FIN = engine_FIN.connect()
+    
+    #put the data from the csv file into the db
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        next(reader)
+        for row in reader:
+            conn_FIN.execute('INSERT INTO tickers (symbol, company) VALUES (?, ?)', (row[0], row[1]), check_same_thread=False)
+            conn_FIN.execute(f'CREATE TABLE "{row[0]}" (date text, open real, high real, low real, close real, adj_close real, volume real)', check_same_thread=False)
+            conn_FIN.execute(f'INSERT INTO "{row[0]}" (date, open, high, low, close, adj_close, volume) VALUES (?, ?, ?, ?, ?, ?, ?)', (row[2], row[3], row[4], row[5], row[6], row[7], row[8]), check_same_thread=False)
+    conn_FIN.close()
+
+    return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -519,17 +664,67 @@ def my_portfolio():
         connected = session['connected'] 
         username = session['username']
     except:
-        home()
+        return home()
 
     #if you are not connected
-    if connected == 0:
-        home()
+    if connected < 1:
+        return home()
+
+
+
+
+    if request.method == 'POST':
+
+        try:
+            company = request.form['company']
+            ticker = get_ticker(company)
+            add_ticker(username, ticker)
+        except:
+            print("Error during getting the company name")
 
     #get the list of tickers in the portfolio
-    get_tickers(username)
+    tickers = get_tickers(username)
+    selector = make_selector()
+
+    if tickers == []:
+        return render_template(
+            'portfolio.html',
+            Connected = username,
+            menu = Markup(menu(connected)),
+            selector = Markup(selector),
+            portfolio = "Your portfolio is empty"
+        )
+
+    
 
 
-    return home()
+    tables = ""
+
+    for ticker in tickers:
+        try:
+            tables+= f"""
+            <h3>{get_company(ticker[0])}</h3>
+            """
+            tables += get_table_limited(ticker[0])
+            tables += """
+            <br>
+            <br>
+            """
+        except:
+            tables += f"""
+            <h3>There is no data for {get_company(ticker[0])}</h3>
+            <br>
+            <br>
+            """
+
+
+    return render_template(
+        'portfolio.html',
+        Connected = username,
+        menu = Markup(menu(connected)),
+        selector = Markup(selector),
+        portfolio = Markup(tables)
+    )
 
 ################################################################################################
 @app.route('/admin', methods = ['GET', 'POST'])
@@ -538,7 +733,7 @@ def admin():
         connected = session['connected'] 
         username = session['username']
     except:
-        home()
+        return home()
 
     #if you are not connected & at least an admin
     if connected < 3:
@@ -703,10 +898,6 @@ def explorator():
     selector = make_selector()
 
     if request.method == 'POST':
-
-        #print all the form data
-        print(request.form)
-
 
         try:
             company = request.form['company']
@@ -887,10 +1078,58 @@ def real_estate():
                            menu = Markup(menu(connected)),
                            result="")
 
-########################################################################################################################################################################################
-@app.route('/')
+################################################################################################
+@app.route('/add_to_db' , methods = ['GET', 'POST'])
 def add_to_db():
-    return home()
+
+    try:
+        connected = session['connected'] 
+        username = session['username']
+    except:
+        return home()
+    
+    #if you are not Admin
+    if connected < 3:
+        return home()
+    
+    if request.method == 'POST':
+    
+        #get the file
+        file = request.files['file']
+        #get the name of the file
+        filename = file.filename
+        #get the extension of the file
+        ext = filename.split('.')[-1]
+        #check if the extension is csv
+        if ext != 'csv':
+            return render_template('addfile.html',
+                                    Connected = username, 
+                                    menu = Markup(menu(connected)),
+                                    message="The file must be a csv")
+        
+        #save the file in the folder
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        #add the file to the database
+        filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        try:
+            add_file(filename)
+        except:
+            return render_template('addfile.html',
+                                    Connected = username, 
+                                    menu = Markup(menu(connected)),
+                                    message="Problem with the file")
+        
+        return render_template('addfile.html',
+                                Connected = username,
+                                menu = Markup(menu(connected)),
+                                message="The file has been added to the database")
+
+        print(files)
+    return render_template('addfile.html',
+                            Connected = username, 
+                            menu = Markup(menu(connected)),
+                            message="")
 
 ################################################################################################
 @app.route('/profile')
@@ -915,11 +1154,23 @@ def profile():
     if connected == 3:
         att = "Admin"
 
+
+    tickers = get_tickers(username)
+    companies = "<h2>Companies you follow</h2>"
+    for ticker in tickers:
+        companies += f"""
+                            <h3>{get_company(ticker[0])} : {ticker[0]}</h3>
+                            
+                      """
+        
+    if ticker == "":
+        companies = "<h2>You don't follow any company</h2>"
+
     return render_template('user.html', 
                            Connected = username, 
                            menu = Markup(menu(connected)),
                            user=Markup(f"""<h1>Hello {username}!</h1>
-                                           <h2>You're attribution level is {connected} which correspond to the {att} level.</h2>"""))
+                                           <h2>You're attribution level is {connected} which correspond to the {att} level.</h2>""" + companies))
 
 ################################################################################################
 @app.route('/login' , methods = ['GET', 'POST'])
@@ -951,8 +1202,6 @@ def login():
                             Connected = username, 
                             menu = Markup(menu(connected)),
                             wrong = "")
-
-
 
 ################################################################################################
 @app.route('/signup', methods = ['GET', 'POST'])
@@ -1051,5 +1300,5 @@ conn_FIN = sqlite3.connect(database)
 models : dict[str:any] = models_loader()
 clf = models['churn_model']
 
-#serve(app, host="0.0.0.0", port=8080)
+serve(app, host="0.0.0.0", port=8080)
 app.run(debug=False)

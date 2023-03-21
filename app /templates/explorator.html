@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>ΣΔAΩ - Login</title>
+		<title>ΣΔAΩ - Stocks Explorator</title>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
@@ -20,7 +20,7 @@
 
 				<!-- Header -->
 					<header id="header">
-						<h1><a href="{{url_for('my_portfolio')}}">ΣΔAΩ</a></h1>
+						<h1><a href="{{url_for('home')}}">ΣΔAΩ</a></h1>
 						<nav>							
 							<a href="#menu" class="icon brands fa-github">{{Connected}}</a>
 						</nav>
@@ -47,8 +47,9 @@
 					<section id="wrapper">
 						<header>
 							<div class="inner">
-								<h2><a href="#" class="icon solid fa-user"></a>  ΣΔAΩ: Portfolio & Real estate</h2>
-								<p>Log in to access your applications</p>
+								<h2><a href="#" class="icon solid fa-search"></a>  ΣΔAΩ: Portfolio & Real estate</h2>
+								<h3>Explorator</h3>
+								<p>Find a company to follow</p>
 							</div>
 						</header>
 
@@ -57,23 +58,19 @@
 								<div class="inner">
 									<!-- Form -->
 								<section>
-									<h3>Log In</h3>
+									<h3>Explorator</h3>
 									
 									<form method="post" >
 	
 										<div class="row gtr-uniform">
 	
-											<div class="col-6 col-12-xsmall">
-												<input type="text" name="id" id="id" value="" placeholder="client number or username"/>
-											</div>
-											<div class="col-6 col-12-xsmall">
-												<input type="password"  name="password" id="pw" value="" placeholder="password"/>
-											</div>
-										
-	
+											<div class="col-12">
+												{{selector}}
+												
+												</div>
 											<div class="col-12">
 												<ul class="actions">
-													<li><input type="submit" value="Log in" class="primary" /></li>
+													<li><input type="submit" value="Find data" class="primary"/></li>
 													<li><input type="reset" value="Reset" /></li>
 												</ul>
 											</div>
@@ -82,25 +79,12 @@
 								</section>
 	
 								<section>
-									<h2>{{wrong}}</h2>
+									{{result}}
 								</section>
-
-								<section>
-									<br>
-								</section>
-
-
-
-								<p>No account? dont worry! tou can just sign up to get started!</p>
-								<ul class="actions fit">
-									<li><a href="{{url_for('sign_up')}}" class="button fit icon solid fa-user-plus">Sign up</a></li>
-								</ul>
 
 							</div>
 						</div>
-							
 					</section>
-
 
 
 

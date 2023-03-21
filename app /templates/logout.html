@@ -6,7 +6,7 @@
 -->
 <html>
 	<head>
-		<title>ΣΔAΩ - Home</title>
+		<title>ΣΔAΩ - Logout</title>
 		<meta charset="utf-8" />
 		<link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
@@ -20,7 +20,7 @@
 
 				<!-- Header -->
 					<header id="header">
-						<h1><a href="{{url_for('my_portfolio')}}">ΣΔAΩ</a></h1>
+						<h1><a href="{{url_for('home')}}">ΣΔAΩ</a></h1>
 						<nav>							
 							<a href="#menu" class="icon brands fa-github">{{Connected}}</a>
 						</nav>
@@ -47,20 +47,38 @@
 					<section id="wrapper">
 						<header>
 							<div class="inner">
-								<h2><a href="#" class="icon solid fa-home"></a>  ΣΔAΩ: Portfolio & Real estate</h2>
-								<h3>Your investment advicing app</h3>
-								<p>{{message}}</p>
+								<h2><a href="#" class="icon solid fa-user-slash"></a>  ΣΔAΩ: Portfolio & Real estate</h2>
+								<h3>Logout</h3>
 							</div>
 						</header>
 
 						<!-- Content -->
 							<div class="wrapper">
 								<div class="inner">
-									{{buttons}}
+									<!-- Form -->
+								<section>
+									<h1>See you around!</h1>
+
+									
+								</section>
+	
+								<section>
+									<div class="row gtr-uniform">
+									<ul class="actions fit">
+											<li><a href="{{url_for('home')}}" class="button fit icon solid fa-home">Home</a></li>
+									</ul>
 								</div>
+								</section>
+
+								<section>
+									<br>
+								</section>
 							</div>
+						</div>
 							
 					</section>
+
+
 
 
 
