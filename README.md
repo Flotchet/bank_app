@@ -79,7 +79,7 @@ You can access to the home page, logout, portfolio, stock explorator, real estat
 
 You can access to the home page, logout, portfolio, stock explorator, real estate price prediction, your profile, churn prediction.
 
-### Attribution level 3 (Admin)
+#### Attribution level 3 (Admin)
 
 You can access to the home page, logout, portfolio, stock explorator, real estate price prediction, your profile, churn prediction, the admin panel and the file adding page.
 
