@@ -26,9 +26,9 @@ https://churn-prediction-vfzv.onrender.com
 
 ### Portfolio (6 working days)
 
-It's a scraping project aimed to obtain data in website that are very well protected against these practice.
+It's a scraping project aimed to obtain data in websites that are very well protected against these practices.
 
-It includes: data engineering.
+It includes: data scraping
 
 ### Projects Merging into a single app (4 working days)
 

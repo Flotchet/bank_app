@@ -20,6 +20,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.compose import make_column_selector as selector
 import hashlib
 
+
+######################################################################################app config
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 app = Flask(__name__, template_folder='templates', static_folder='templates/assets')
@@ -44,22 +46,7 @@ db = SQLAlchemy(app)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+###########################################################################real estate functions
 #real estate
 def RE_prepare_zipcode(df : pd.DataFrame) -> dict[int:float]:
     #create zipcode conversion table
@@ -181,6 +168,7 @@ def models_loader() -> dict[str : any]:
     return models
 
 
+#############################################################################all pages functions
 def menu(level : int) -> str : 
 
     if level == 0:
@@ -231,6 +219,7 @@ def menu(level : int) -> str :
 
     return "Error attribution level"
 
+############################################################################home pages functions
 def buttons(level : int, username : str) -> str:
     if level == 0:
 
@@ -324,6 +313,7 @@ def buttons(level : int, username : str) -> str:
 
     return "Error attribution level"
 
+##################################################################admin & signup pages functions
 def add_user(username : str, password : str, level : int) -> None:
     """Add a user to the database"""
     #encrypt the password wit hashlib
@@ -350,7 +340,7 @@ def check_user(username : str) -> bool:
 
     return True
 
-
+############################################################################login page functions
 def loginf(username : str, password : str) -> bool:
     """check if username and password are correct"""
     password = hashlib.sha256(password.encode()).hexdigest() 
@@ -366,6 +356,7 @@ def loginf(username : str, password : str) -> bool:
     
     return result[0][2]
 
+##########################################################explorator & protfolio pages functions
 def make_selector() -> str:
     """Make a selector of this type
     <input type = "text" list="company" placeholder="Company name">
@@ -395,7 +386,7 @@ def make_selector() -> str:
 
     return selector
     
-
+########################################################################multiple pages functions
 def get_ticker(company : str) -> str:
     """Get the ticker of a company"""
     engine_FIN = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/fin.db'), echo=False)
@@ -406,7 +397,7 @@ def get_ticker(company : str) -> str:
 
     return result[0][0]
 
-
+######################################################################explorator pages functions
 def get_table(ticker : str) -> str:
     """make an html table from the data of a company"""
 
@@ -448,6 +439,7 @@ def get_table(ticker : str) -> str:
 
     return table
     
+###################################################################¼####portfolio page functions    
 def get_table_limited(ticker : str) -> str:
     """make an html table from the data of a company"""
 
@@ -491,7 +483,6 @@ def get_table_limited(ticker : str) -> str:
 
     return table
 
-
 def get_tickers(username : str) -> list:
     """get the tickers of the user from the followed db"""
 
@@ -514,8 +505,6 @@ def add_ticker(username : str, ticker :str) -> None:
 
     return None
 
-
-
 def get_company(ticker : str) -> str:
     """Get the company of a ticker"""
     engine_FIN = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/fin.db'), echo=False)
@@ -527,6 +516,7 @@ def get_company(ticker : str) -> str:
     return result[0][0]
 
 
+#########################################################################add file page functions
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -547,80 +537,6 @@ def add_file(filename : str) -> None:
     conn_FIN.close()
 
     return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 								
 ################################################################################################							
@@ -1279,10 +1195,9 @@ def logout():
     return render_template('logout.html')
 
 
-#GENERAL APP FUNCTIONS###################################################################### END
 
 
-
+################################################################################################
 #data for real estate prediction
 data_RE : pd.DataFrame = pd.read_csv('data/data_for_regression.csv')
 #prepare the data
