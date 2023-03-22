@@ -7,6 +7,7 @@ import os
 import pandas as pd
 import datetime
 import os
+import csv
 import sqlite3
 import pandas
 import secrets
@@ -657,7 +658,7 @@ def home():
                            message = message
                           )
 
-########################################################################################################################################################################################
+################################################################################################
 @app.route('/portfolio', methods = ['GET', 'POST'])
 def my_portfolio():
     try:
@@ -1181,6 +1182,9 @@ def login():
         username = session['username']
     except:
         return home()
+    
+    if connected > 0:
+        return home()
 
     if request.method == 'POST':
         user = request.form['id']
@@ -1211,6 +1215,9 @@ def sign_up():
         connected = session['connected'] 
         username = session['username']
     except:
+        return home()
+    
+    if connected > 0:
         return home()
     
     if request.method == 'POST':
