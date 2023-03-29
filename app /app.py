@@ -41,6 +41,7 @@ ALLOWED_EXTENSIONS = {'csv'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+app.config["DEBUG"] = False
 
 db = SQLAlchemy(app)
 
@@ -348,7 +349,7 @@ def loginf(username : str, password : str) -> bool:
     engine_USR = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/users.db'), echo=False)
     conn_USR = engine_USR.connect()
     #get result from the database where username = username and password = password
-    result = conn_USR.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password)).fetchall()
+    result = conn_USR.execute('SELECT * FROM users WHERE username = ? AND password = ?', (username, password), check_same_thread=False).fetchall()
     conn_USR.close()
 
     if len(result) == 0:
@@ -438,10 +439,12 @@ def get_table(ticker : str) -> str:
     """
 
     return table
+
+
     
-###################################################################¼####portfolio page functions    
-def get_table_limited(ticker : str) -> str:
-    """make an html table from the data of a company"""
+
+def get_graph(ticker : str) -> str:
+    """make an html graph from the data of a company"""
 
     engine_FIN = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/fin.db'), echo=False)
     conn_FIN = engine_FIN.connect()
@@ -449,6 +452,128 @@ def get_table_limited(ticker : str) -> str:
     result = conn_FIN.execute(f'SELECT * FROM  "{ticker}"', check_same_thread=False).fetchall()
     conn_FIN.close()
 
+    #take 100 evenly spread data points
+    result = result[::len(result)//250]
+
+    #invert the data
+    result = result[::-1]
+
+    #make the graph using chart.js
+    graph = f"""
+    <canvas id="{ticker}" style="width:100%"></canvas>
+
+        <script>
+            const xValues = [
+    """
+    for row in result:
+        graph += f"""
+        '{row[0]}',
+        """
+    graph += """
+    ]; 
+    """
+
+
+
+    graph +=f"""
+            new Chart("{ticker}", """
+    graph +="""{
+                type: "line",
+                    data: {
+                        labels: xValues,
+                        datasets: [{ 
+                            data: ["""
+    
+    last = 0.0
+    for row in result:
+        try:
+            last = float(row[1])
+        except:
+            pass
+        graph += f"""{last},"""
+
+    graph += """],
+      borderColor: "red",
+      fill: false
+    }]
+  },
+  options: {
+    legend: {display: false},
+    title: {
+      display: true,
+      text: "stock prices over time",
+      fontSize: 16
+    }
+    
+  }
+});
+</script>
+"""
+    
+
+
+
+    return graph
+
+
+
+def get_graph_x(id : int, result) -> str:
+    """make an html graph from the data of a company"""
+    #take 100 evenly spread data points
+    result = result[::len(result)//25]
+
+    #invert the data
+    result = result[::-1]
+
+    #make the graph using chart.js
+
+    script = f"""
+    var ctx_{id} = document.getElementById('graph{id}').getContext('2d');
+    var data_{id} = ["""
+    last = 0.0
+    for row in result:
+        try:
+            last = float(row[1])
+        except:
+            pass
+        script += f"""{last},"""
+
+    #remove the last comma
+    script = script[:-1]
+
+    script += f"""];
+
+    var myChart_{id} = new Chart(ctx_{id},"""
+    script += """{
+        type: 'line',
+        data: {
+            labels: ["""
+    for row in result:
+        script += f"""'{row[0]}',"""
+
+    #remove the last comma
+    script = script[:-1]
+    script += """],
+            datasets: [{
+                """
+    script += f"""data: data_{id},"""
+    script += """
+                borderColor:"red",
+                borderWidth: 1
+            }]
+        },
+        options: {
+    responsive: false
+  }
+});"""
+                
+    return script
+    
+###################################################################¼####portfolio page functions    
+def get_table_limited(ticker : str, result) -> str:
+    """make an html table from the data of a company"""
+
+    
 
     #make the table
     table = """
@@ -574,6 +699,9 @@ def home():
                            message = message
                           )
 
+
+
+
 ################################################################################################
 @app.route('/portfolio', methods = ['GET', 'POST'])
 def my_portfolio():
@@ -609,24 +737,46 @@ def my_portfolio():
             Connected = username,
             menu = Markup(menu(connected)),
             selector = Markup(selector),
+            script = "",
             portfolio = "Your portfolio is empty"
         )
 
     
 
-
+    script = """"""
     tables = ""
-
+    #script = """<script>"""
+    id = 1
     for ticker in tickers:
         try:
-            tables+= f"""
+
+            engine_FIN = db.create_engine('sqlite:///' + os.path.join(basedir, 'databases/fin.db'), echo=False)
+            conn_FIN = engine_FIN.connect()
+            #get the data of the table ticker
+            result = conn_FIN.execute(f'SELECT * FROM  "{ticker[0]}"', check_same_thread=False).fetchall()
+            conn_FIN.close()
+
+
+            #try:
+            #    script += get_graph_x(id,result)
+            #except Exception as e:
+            #    print("Error during the graph creation")
+            #    print(e)
+            
+            #tables+= f"""
+            #<canvas id="graph{id}" style="width:100%"></canvas>
+            #"""
+            
+            tables += f"""
             <h3>{get_company(ticker[0])}</h3>
             """
-            tables += get_table_limited(ticker[0])
+            
+            tables += get_table_limited(ticker[0], result)
             tables += """
             <br>
             <br>
             """
+            id += 1
         except:
             tables += f"""
             <h3>There is no data for {get_company(ticker[0])}</h3>
@@ -634,12 +784,15 @@ def my_portfolio():
             <br>
             """
 
+    #script += """</script>"""
+
 
     return render_template(
         'portfolio.html',
         Connected = username,
         menu = Markup(menu(connected)),
         selector = Markup(selector),
+        script = Markup(script),
         portfolio = Markup(tables)
     )
 
@@ -834,11 +987,17 @@ def explorator():
         except:
             table += "No data available"
 
+        try:
+            graph = get_graph(ticker)
+        except:
+            graph = ""
+
         return render_template('explorator.html',
                                 Connected = username, 
                                 menu = Markup(menu(connected)), 
                                 selector = Markup(selector),
-                                result = Markup(table))
+                                result = Markup(table),
+                                graph = Markup(graph))
 
 
     
@@ -847,7 +1006,8 @@ def explorator():
                             Connected = username, 
                             menu = Markup(menu(connected)), 
                             selector = Markup(selector),
-                            result = "")
+                            result = "",
+                            graph = "")
 
 
 ################################################################################################
@@ -1042,7 +1202,7 @@ def add_to_db():
                                 menu = Markup(menu(connected)),
                                 message="The file has been added to the database")
 
-        print(files)
+
     return render_template('addfile.html',
                             Connected = username, 
                             menu = Markup(menu(connected)),
@@ -1199,20 +1359,20 @@ def logout():
 
 ################################################################################################
 #data for real estate prediction
-data_RE : pd.DataFrame = pd.read_csv('data/data_for_regression.csv')
+data_RE : pd.DataFrame = pd.read_csv(os.path.join(basedir, 'data/data_for_regression.csv'))
 #prepare the data
 zipcode_converter : dict[int:float] = RE_prepare_zipcode(data_RE)
 tax_converter : dict[int:float] = RE_prepare_tax(data_RE)
 type_converter : dict[str:float] = RE_prepare_type(data_RE)
 
 #load the data for the churn prediction
-database = "databases/churn.db"
+database = os.path.join(basedir, 'databases/churn.db')
 conn = sqlite3.connect(database)
 data_CP : pd.DataFrame = pd.read_sql('SELECT CLIENTNUM, Attrition_Flag, Total_Relationship_Count, Credit_Limit, Total_Revolving_Bal, Avg_Open_To_Buy, Total_Trans_Amt, Total_Trans_Ct FROM bank_churners', conn)
 conn.close()
 
-database = "databases/fin.db"
-userbase = "databases/users.db"
+database = os.path.join(basedir, 'databases/fin.db')
+userbase = os.path.join(basedir, 'databases/users.db')
 
 conn_FIN = sqlite3.connect(database)
 
